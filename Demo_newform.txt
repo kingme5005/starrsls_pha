@@ -1,0 +1,230 @@
+libname pha "/harvard/aking/DataQC/pha/data/";
+libname aagcons "/harvard/APC_OUTRA_CASES/Sleep_study/DATA/";
+%include '/home/aking/assign_libnames.sas';
+options nocenter nofmterr mprint symbolgen mlogic mprint;
+
+%include '/harvard/aking/sleep/code/varlist.sas';
+
+libname slp '/harvard/ihwang/Sleep_study/DATA';
+
+*bring in cumulative person-month SAs and WOT deployments;	
+data sa_attempts;
+	set 	lsan2.SA_RCDS_NODUP_BY_DAY_04_19V2;* (where=(suicide_attempt= 1));
+	
+	year_month_key=mdy(month(date_encounter), 01, year(date_encounter));	
+	suicide_attempt=1;
+	
+	keep 	pid_pde year_month_key ;
+	proc sort nodupkey; by pid_pde year_month_key;
+	proc sort ; by pid_pde descending year_month_key;
+	proc sort nodupkey; by pid_pde;
+run;
+
+
+
+
+data work1;
+	set pha.sa_6m_tx3;
+	
+	
+
+	proc sort; by outcome_6msa;
+run;
+
+proc surveyselect data=work1
+	method=sys sampsize=(1040700,2096) seed=123 out=work2;
+	strata outcome_6msa;
+run;
+
+proc sql;
+	create table count_survey as
+	select distinct pid_pde,
+		count(*) as number_of_surveys, 
+		max(outcome_6msa) as max_outcome_6msa,
+		max(suicide_any) as max_suicide_any,
+		max(flag_enl_sa1) as max_flag_enl_sa1
+	from work2
+	group by pid_pde
+	order by pid_pde;
+	
+quit;
+
+data count_survey2;
+	merge 	count_survey (in=a)
+			sa_attempts (rename=(year_month_key=date_last_sa));
+	by pid_pde;
+	if a=1;
+	
+	if '01JAN2014'd le date_last_sa le '31DEC2019'd then suicide_attempt=1;
+run;
+data work2;
+	set work2;
+	
+	keep pid_pde year_month_key outcome_6msa flag_enl_sa1 suicide_any;
+	
+	proc sort; by pid_pde year_month_key;
+run;
+proc freq data=count_survey2; 
+tables number_of_surveys max_outcome_6msa*max_suicide_any*max_flag_enl_sa1/missing list;
+tables number_of_surveys max_outcome_6msa*max_suicide_any*max_flag_enl_sa1*suicide_attempt/missing list; 
+run;
+
+
+proc surveyfreq data=work2; tables outcome_6msa*suicide_any;
+proc freq data=work2; tables outcome_6msa*flag_enl_sa1*suicide_any/missing list;
+proc surveyfreq data=work1; tables outcome_6msa; 
+proc freq data=work1; tables outcome_6msa*flag_enl_sa1*suicide_any/missing list;
+run;
+
+endsas;
+data work3;	
+	merge 	work2 (in=a)
+			aagcons.mc_predictors (keep= pid_pde year_month_key  deployed_wot_num)
+			lsan2.mast_constructs_aag_new_2019 (keep=	pid_pde year_month_key
+														mast_pm_v001
+														mast_pm_v010
+														mast_pm_v318
+														mast_pm_v036-mast_pm_v042 mast_pm_v306
+														mast_pm_v004 mast_pm_v005 mast_pm_v008
+														mast_pm_v026-mast_pm_v033
+														deer_pm_v001 deer_pm_v084 deer_pm_v083
+														mast_pm_v134-mast_pm_v140);
+	by pid_pde year_month_key;
+	if a=1;
+
+	army_time=int(mast_pm_v318/12);
+	if army_time < 1 then army_time=1;
+	id=1;
+	
+	IF mast_pm_v036=1 or
+		mast_pm_v037=1 or
+		mast_pm_v038=1 then rank_3cat=1;
+	else if mast_pm_v039=1 or 
+		mast_pm_v040=1 or 
+		mast_pm_v041=1 then rank_3cat=2;*NCO;
+	else if mast_pm_v042=1 or 
+		mast_pm_v306=1 THEN rank_3cat=2;
+	else rank_3cat=4;*officers;
+	
+	proc rank out=work4 groups=4;
+	var army_time mast_pm_v010;
+	ranks army_time_cat age_cat;
+run;
+
+data work4;
+	set work4;
+	
+	if mast_pm_v010 ge 28 then age_catb=1;
+	else if mast_pm_v010 ge 25 then age_catb=2;
+	else if mast_pm_v010 ge 22 then age_catb=3;
+	else age_catb=4;
+	
+	if army_time ge 5 then army_time_catb=1;
+	else if army_time ge 3 then army_time_catb=2;
+	else if army_time ge 2 then army_time_catb=3;
+	else army_time_catb=4;
+	
+	sexf=1-mast_pm_v001;
+	*hierarchical race categories;
+	if mast_pm_v004 eq 1 then race_cat=2;
+	else if mast_pm_v005 eq 1 then race_cat=3;
+	else if mast_pm_v008 eq 1 then race_cat=4;
+	else race_cat=1;*white;
+	array dummya (4) race_cat1-race_cat4;
+	do i=1 to 4;
+		dummya(i)=0;
+	end;
+	dummya(race_cat)=1;
+	drop i;
+	
+	*max education;
+	if sum(of mast_pm_v026-mast_pm_v028) ge 1 then ed_cat=1;*GED or alternative equivalent;
+	else if mast_pm_v029 eq 1 then ed_cat=2;*HS diploma;
+	else if mast_pm_v030 eq 1 then ed_cat=3;*some college;
+	else if sum(of mast_pm_v031-mast_pm_v033) ge 1 then ed_cat=4;*college graduate;
+	array dummyb (4) ed_cat1-ed_cat4;
+	do i=1 to 4;
+		dummyb(i)=0;
+	end;
+	dummyb(ed_cat)=1;
+	drop i;
+	
+	
+	if deer_pm_v001 eq 1 then mhx_cat=1; *currently;
+	else if deer_pm_v084 eq 1 then mhx_cat=2; *previously;
+	else if deer_pm_v083 eq 1 then mhx_cat=3; *never;
+	if mhx_cat eq . then delete;*delete n=2 empty records;
+	array dummyc (3) mhx_cat1-mhx_cat3;
+	do i=1 to 3;
+		dummyc(i)=0;
+	end;
+	dummyc(mhx_cat)=1;
+	drop i;
+	
+	*/*;
+	if deployed_wot_num ge 3 then deployed_wot_num=3;
+	deployed_wot_numb=deployed_wot_num+1;
+	array dummyf (4) deployed_wot_cat1-deployed_wot_cat4;
+	do i=1 to 4;
+		dummyf(i)=0;
+	end;
+	dummyf(deployed_wot_numb)=1;
+	drop i;
+	*/*;
+	
+	if mast_pm_v134 eq 1 then command_cat=1; *forscom;
+	if mast_pm_v135 eq 1 then command_cat=2; *tradoc;
+	if mast_pm_v136 eq 1 then command_cat=3; *europe;
+	if mast_pm_v137 eq 1 then command_cat=4; *tradoc;
+	if mast_pm_v138 eq 1 then command_cat=5; *tradoc;
+	if mast_pm_v139 eq 1 then command_cat=6; *tradoc;
+	if mast_pm_v140 eq 1 then command_cat=7; *guard or reserve;
+	if command_cat eq . then command_cat=7;
+	array dummyg (7) command_cat1-command_cat7;
+	do i=1 to 7;
+		dummyg(i)=0;
+	end;
+	dummyg(command_cat)=1;
+	drop i;
+	
+	/*;
+	duty_moscatb=duty_moscat4;
+	array dummyh (4) duty_moscatb1-duty_moscatb4;
+	do i=1 to 4;
+		dummyh(i)=0;
+	end;
+	dummyh(duty_moscatb)=1;
+	drop i;
+	*/*;
+run;
+
+ods html file = "/harvard/aking/DataQC/pha/tables/demo_table.html";
+proc means mean min max nmiss;
+	var mast_pm_v010;
+	class age_cat;
+proc means mean min max nmiss;
+	var army_time;
+	class army_time_cat;
+proc surveyfreq ; 
+	*weight  weight1;
+	tables 	outcome_6msa*age_cat
+			outcome_6msa*age_catb
+			outcome_6msa*army_time_cat
+			outcome_6msa*army_time_catb
+			outcome_6msa*mast_pm_v001
+			outcome_6msa*race_cat 
+			outcome_6msa*ed_cat
+			outcome_6msa*mhx_cat
+			outcome_6msa*rank_3cat
+			
+			outcome_6msa*command_cat
+			/ row wchisq;
+			*outcome_6msa*deployed_wot_num
+			outcome_6msa*duty_moscat4;
+	
+run;
+ods html close;
+
+
+
+

@@ -1,0 +1,106 @@
+libname pha "/harvard/aking/DataQC/pha/data/";
+%include '/home/aking/assign_libnames.sas';
+options nocenter nofmterr mprint symbolgen mlogic mprint;
+
+
+
+
+
+*%include '/harvard/aking/DataQC/pha/analysis/pha_oldform_work1.sas';
+
+
+data work1;
+	set pha.sa_6m_tx3;
+	
+	tx_cat1=0;
+	if tx_cat eq 1 then tx_cat1=1;
+	
+	suicidal_cat1=0;
+	if suicidal_cat eq 1 then suicidal_cat1=1;
+	
+	phq2_yes=0;
+	if phq2_score ge 2 or phq8_score ge 3 then phq2_yes=1;*this is the flag for making it to the phq8;
+	
+	proc sort; by outcome_6msa;
+run;
+
+
+*/*;
+proc surveyselect data=work1
+	method=sys sampsize=(1040700,2096) seed=123 out=work2;
+	strata outcome_6msa;
+run;
+
+data work3;
+	set work2 (in=a where=(year < 2016))
+		pha.sa_6m_tx3_oldform (in=b);
+	if a=1 then newform=1;
+	if b=1 then newform=0;
+
+run;
+*/*;
+proc lifetest data=work2 intervals=(0 to 6 by 1) method=lt;
+	time fu_6m*outcome_6msa(0);
+	*strata  tx_cat1 ;
+	
+	ods output 	lifetableestimates=lte_outstat  ;
+run;
+proc lifetest data=work3 intervals=(0 to 6 by 1) method=lt;
+	time fu_6m*outcome_6msa(0);
+	strata  newform ;
+	*where newform=1;
+	ods output 	lifetableestimates=lte_outstat_oldform  ;
+run;
+
+ods excel file = "/harvard/aking/DataQC/pha/tables/proj_risk_ctab.xlsx";
+proc print data=lte_outstat_oldform;
+proc print data=lte_outstat;
+proc surveyfreq data=work2;
+	tables outcome_6msa;
+	tables outcome_6msa*tx_cat1/row;
+	tables outcome_6msa*suicidal_cat/row;
+	tables outcome_6msa*suicidal_cat*tx_cat1/row;
+	tables tx_cat1*outcome_6msa/row;
+	tables pha_pass_ideation*outcome_6msa/row;
+	tables suicidal_cat*outcome_6msa/row;
+	tables suicidal_cat*tx_cat1*outcome_6msa/row;
+	tables year;
+	tables year*phq2_yes/row ;
+	tables year*phq2_yes*suicidal_cat1/row;
+	tables phq2_yes/row;
+	tables phq2_yes*suicidal_cat1/row;
+	*where 2014 le year le 2019 and phq2_score_id1=1;
+	*where suicidal_cat_id1=1;
+proc surveyfreq data=work2; 
+
+	tables year;
+	tables year*phq2_yes/row ;
+	tables year*phq2_yes*suicidal_cat1/row;
+	tables phq2_yes/row;
+	tables phq2_yes*suicidal_cat1/row;
+	
+
+where year in (2014,2015);
+proc surveyfreq data=pha.sa_6m_tx3_oldform; 
+
+	tables year;
+	tables year*phq2_yes/row ;
+	tables year*phq2_yes*suicidal_cat1/row;
+	tables phq2_yes/row;
+	tables phq2_yes*suicidal_cat1/row;
+	
+
+run;
+proc surveyfreq data=work3; 
+
+	tables newform*year;
+	tables year*phq2_yes/row ;
+	tables year*phq2_yes*suicidal_cat1/row wchisq;
+	tables newform*phq2_yes/row;
+	tables newform*phq2_yes*suicidal_cat1/row wchisq;
+	
+
+run;
+proc surveyfreq data=work2;
+ods excel close;
+
