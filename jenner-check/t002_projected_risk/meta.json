@@ -1,0 +1,7 @@
+{
+  "bundle": "t002_projected_risk",
+  "source_file": "Projected_risk.sas",
+  "source_blob_sha": "53ff425bfbb2948bf73f5b03d9aee8de839cda9a",
+  "source_commit": "8480e108b133b7c1490707309a919979c31c2200",
+  "notes": "Projected-risk survival script: PROC LIFETEST with the actuarial life-table method (method=lt) over the 6-month follow-up window, intervals 0 to 6 by 1, time fu_6m*outcome_6msa(0). Upstream reads work1 from an external libname and %includes an external assign_libnames.sas; here work1 is built inline in script.sas (30-row synthetic dataset) with the two columns the time statement reads (fu_6m, outcome_6msa), so the script is self-contained and reproducible on its own. ODS destination rewritten from the author's absolute xlsx path to a relative file. The PROC LIFETEST interval/method/time specification is exactly the author's."
+}

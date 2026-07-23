@@ -1,0 +1,7 @@
+{
+  "bundle": "t003_auc_roc_lasso",
+  "source_file": "auc_roc_lasso.sas",
+  "source_blob_sha": "24f405004edfc28a3c8ad3107cbfaff2a89a1db3",
+  "source_commit": "8480e108b133b7c1490707309a919979c31c2200",
+  "notes": "Model-1 slice of the LASSO risk-model evaluation pipeline: PROC LOGISTIC with weighted ROC (rocoptions(weighted), nofit, roc pred=pred_prob) against a survey weight1, then PROC UNIVARIATE producing 100 weighted percentile cut points (pctlpts = 1 to 100 by 1), the ventile-category DATA step that bins pred_prob against those cut points, and PROC SURVEYFREQ crosstabbing the ventile categories against outcome_6msa with row/col percentages. Upstream builds the input by PROC IMPORT of an external CSV merged with pha.test_sample from an external libname; autoexec supplies sample1_lasso_pp_test with the three columns the pipeline reads (pred_prob, weight1, outcome_6msa). ROC output dataset retargeted from the external harvrd04 libname to work; ODS destinations rewritten to relative files. The LOGISTIC/UNIVARIATE/ventile/SURVEYFREQ statements are exactly the author's model-1 code."
+}

@@ -1,0 +1,20 @@
+    The LIFETEST Procedure    
+
+                             N
+--------------------  --------
+Total                       30
+Event                       10
+Censored                    20
+Median Survival Time    5.0000
+
+                 Life Table Survival Estimates                 
+
+Interval  Survival  Std Error  Number at Risk  Number of Events
+--------  --------  ---------  --------------  ----------------
+  0 to 1    1.0000     0.0000              30                 0
+  1 to 2    0.9000     0.0548              30                 3
+  2 to 3    0.7981     0.0554              27                 3
+  3 to 4    0.7272     0.0479              23                 2
+  4 to 5    0.6899     0.0363              20                 1
+  5 to 6    0.6481     0.0405              18                 1
+

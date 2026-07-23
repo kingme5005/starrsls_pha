@@ -1,0 +1,20 @@
+{
+  "_captured_at": "2026-07-23T12:43:20.439179+00:00",
+  "_captured_run_id": "r_db4c9939e49b40bebc48f4dd91a4ed2f",
+  "status": "ok",
+  "exit_code": 0,
+  "log_contains": [
+    "NOTE: OUTROC dataset roc_sample1_lasso_test written with 2 points.",
+    "NOTE: Output dataset pSL_cut_points has 1 observations and 100 variables.",
+    "NOTE: Wrote pp_lasso1 (30 rows, 109 columns).",
+    "NOTE: PROC SURVEYFREQ completed."
+  ],
+  "log_does_not_contain": [
+    "ERROR:",
+    "[JENNER-ERROR"
+  ],
+  "diagnostics": {
+    "parse_warnings": [],
+    "runtime_warnings": []
+  }
+}

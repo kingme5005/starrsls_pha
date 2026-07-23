@@ -1,0 +1,19 @@
+{
+  "_captured_at": "2026-07-23T12:39:58.309086Z",
+  "_captured_run_id": "r_756e270de30f479ea5c3146cbe7a630c",
+  "status": "ok",
+  "exit_code": 0,
+  "log_contains": [
+    "NOTE: Wrote work1 (20 rows, 13 columns).",
+    "NOTE: PROC SURVEYFREQ data=work1",
+    "NOTE: PROC SURVEYFREQ completed."
+  ],
+  "log_does_not_contain": [
+    "ERROR:",
+    "[JENNER-ERROR"
+  ],
+  "diagnostics": {
+    "parse_warnings": [],
+    "runtime_warnings": []
+  }
+}

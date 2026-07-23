@@ -1,0 +1,20 @@
+NOTE: Option OBS changed to 100.
+NOTE: DATA work1
+
+NOTE: Processing inline DATALINES (20 lines)
+
+NOTE: Read 20 rows from DATALINES.
+NOTE: Wrote work1 (20 rows, 13 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: ODS HTML: Destination opened (file=demo_table.html).
+NOTE: PROC MEANS
+NOTE: PROC MEANS statement used.
+NOTE: PROC MEANS
+NOTE: PROC MEANS statement used.
+NOTE: PROC SURVEYFREQ data=work1
+
+NOTE: Using Python scipy version 1.16.3
+NOTE: PROC SURVEYFREQ completed.
+NOTE: ODS HTML: Output written to /tmp/work/r_756e270de30f479ea5c3146cbe7a630c/demo_table.html.
