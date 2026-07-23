@@ -1,0 +1,7 @@
+{
+  "bundle": "t001_demo_newform",
+  "source_file": "Demo_newform.sas",
+  "source_blob_sha": "e8ed58b8952c93dbae0db5e9c39c231a03e4bc7b",
+  "source_commit": "8480e108b133b7c1490707309a919979c31c2200",
+  "notes": "Descriptive table script: two PROC MEANS (mast_pm_v010 by age_cat; army_time by army_time_cat) and PROC SURVEYFREQ crosstabbing outcome_6msa against ten demographic/service categories with row percentages and Wald chi-square. Upstream reads work1 from an external libname (/harvard/aking/DataQC/pha/data/); autoexec supplies a 20-row synthetic work1 matching the columns the script reads. ODS HTML path rewritten from the author's absolute path to a relative file. Analysis statements (var/class/tables/options) unchanged."
+}

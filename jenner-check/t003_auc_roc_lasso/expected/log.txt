@@ -1,0 +1,62 @@
+NOTE: Option OBS changed to 100.
+NOTE: DATA sample1_lasso_pp_test
+
+NOTE: Processing inline DATALINES (30 lines)
+
+NOTE: Read 30 rows from DATALINES.
+NOTE: Wrote sample1_lasso_pp_test (30 rows, 3 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC LOGISTIC data=sample1_lasso_pp_test
+
+NOTE: Using Python statsmodels.api.Logit version 0.14.6
+NOTE: OUTROC dataset roc_sample1_lasso_test written with 2 points.
+NOTE: ODS plot written: logistic_roc.spec.json
+NOTE: PROC LOGISTIC ODS Graphics generated.
+NOTE: PROC LOGISTIC completed. Results written to: ./ods_output/logistic_results.spec.json
+NOTE: DATA roc_sample1_lasso_test
+
+
+NOTE: Read 2 rows from roc_sample1_lasso_test.
+NOTE: Wrote roc_sample1_lasso_test (2 rows, 3 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA sample1_lasso_pp_test
+
+
+NOTE: Read 30 rows from sample1_lasso_pp_test.
+NOTE: Wrote sample1_lasso_pp_test (30 rows, 4 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC UNIVARIATE
+NOTE: Output dataset pSL_cut_points has 1 observations and 100 variables.
+NOTE: DATA pSL_cut_points
+
+
+NOTE: Read 1 rows from pSL_cut_points.
+NOTE: Wrote pSL_cut_points (1 rows, 101 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA pp_lasso1
+
+NOTE: Stream 1 processed 30 rows, max BY-group size: 30 (O(1) memory verified)
+NOTE: Stream 2 processed 1 rows, max BY-group size: 1 (O(1) memory verified)
+
+NOTE: Wrote pp_lasso1 (30 rows, 109 columns).
+NOTE: DATA elapsed:
+  wall  0.01 seconds
+  cpu   0.01 seconds
+NOTE: PROC PRINT data=auc_sample1_lasso_test
+
+NOTE: PROC PRINT completed: 1 observations printed, 8 variables
+NOTE: ODS EXCEL: wrote workbook to /tmp/work/r_db4c9939e49b40bebc48f4dd91a4ed2f/lasso_6msa_aucroc.xlsx (typed cells from IR).
+NOTE: ODS HTML: Destination opened (file=lasso_6msa_ctab.html).
+NOTE: PROC SURVEYFREQ data=pp_lasso1
+
+NOTE: Using Python scipy version 1.16.3
+NOTE: PROC SURVEYFREQ completed.
+NOTE: ODS HTML: Output written to /tmp/work/r_db4c9939e49b40bebc48f4dd91a4ed2f/lasso_6msa_ctab.html.
